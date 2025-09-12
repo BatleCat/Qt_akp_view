@@ -5,6 +5,7 @@
 #include <QVector>
 #include <QtNetwork/QUdpSocket>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QStatusBar>
@@ -20,7 +21,15 @@
 #include <QScrollBar>
 //-----------------------------------------------------------------------------
 #include <memory.h>
-#include <winsock.h>
+#if defined(Q_OS_LINUX)
+    #include <sys/types.h>
+    #include <sys/socket.h>
+    #include <netdb.h>
+    #include <netinet/in.h>
+    #include <arpa/inet.h>
+#elif defined(Q_OS_WIN)
+    #include <winsock.h>
+#endif
 //-----------------------------------------------------------------------------
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -141,6 +150,30 @@ MainWindow::MainWindow(QWidget *parent) :
 //    statusBar()->addWidget(label_CRC8_check);
 //    label_CRC8_check->setText(QString::fromUtf8(""));
 
+    label_VK1time = new QLabel(QString::fromUtf8("Т1: 1024 мкс "));
+    label_VK1time->setAlignment(Qt::AlignLeft);
+    label_VK1time->setMinimumSize(label_VK1time->sizeHint());
+    statusBar()->addWidget(label_VK1time);
+    label_VK1time->setText(QString::fromUtf8(""));
+
+    label_VK1ampl = new QLabel(QString::fromUtf8("А1: 65536 "));
+    label_VK1ampl->setAlignment(Qt::AlignLeft);
+    label_VK1ampl->setMinimumSize(label_VK1ampl->sizeHint());
+    statusBar()->addWidget(label_VK1ampl);
+    label_VK1ampl->setText(QString::fromUtf8(""));
+
+    label_VK2time = new QLabel(QString::fromUtf8("Т2: 1024 мкс "));
+    label_VK2time->setAlignment(Qt::AlignLeft);
+    label_VK2time->setMinimumSize(label_VK2time->sizeHint());
+    statusBar()->addWidget(label_VK2time);
+    label_VK2time->setText(QString::fromUtf8(""));
+
+    label_VK2ampl = new QLabel(QString::fromUtf8("А2: 65536 "));
+    label_VK2ampl->setAlignment(Qt::AlignLeft);
+    label_VK2ampl->setMinimumSize(label_VK2ampl->sizeHint());
+    statusBar()->addWidget(label_VK2ampl);
+    label_VK2ampl->setText(QString::fromUtf8(""));
+
     label_ML = new QLabel(QString::fromUtf8("MM"));
     label_ML->setAlignment(Qt::AlignCenter);
 
@@ -220,7 +253,9 @@ MainWindow::MainWindow(QWidget *parent) :
     QRectF rectf;
     rectf.setRect(0.0, 0.0, 100.0, 100.0);
 
-    scene_vk1 = new QGraphicsScene(rectf);
+//    scene_vk1 = new QGraphicsScene(rectf);
+    scene_vk1 = new CustomScene;
+    scene_vk1->setSceneRect(rectf);
 
     view_vk1 = new QGraphicsView(scene_vk1);
     view_vk1->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -260,6 +295,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, &MainWindow::changeFKDstep,   time_line1, &Qt_TIME_LINE::on_changeTimeScale );
 
+    view_vk1->setMouseTracking(true);
+    connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
+
     ui->horizontalLayout_VK1->addWidget(view_vk1);
     //-------------------------------------------------------------------------
     rectf.setRect(0.0, 0.0, 100.0, 100.0);
@@ -298,7 +336,9 @@ MainWindow::MainWindow(QWidget *parent) :
 //    QRectF rectf;
     rectf.setRect(0.0, 0.0, 100.0, 100.0);
 
-    scene_vk2 = new QGraphicsScene(rectf);
+//    scene_vk2 = new QGraphicsScene(rectf);
+    scene_vk2 = new CustomScene;
+    scene_vk2->setSceneRect(rectf);
 
     view_vk2 = new QGraphicsView(scene_vk2);
     view_vk2->setAlignment(Qt::AlignLeft | Qt::AlignTop);
@@ -337,6 +377,9 @@ MainWindow::MainWindow(QWidget *parent) :
     time_line2->set_x_scale(FKDstep);
 
     connect(this, &MainWindow::changeFKDstep,   time_line2, &Qt_TIME_LINE::on_changeTimeScale );
+
+    view_vk2->setMouseTracking(true);
+    connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
 
     ui->horizontalLayout_VK2->addWidget(view_vk2);
     //-------------------------------------------------------------------------
@@ -726,10 +769,24 @@ void MainWindow::on_show(void)
         akp_file.read_ch1(index, vk);
         on_showNewData (akp_file.read_ch1_vk_number(index), vk);
 //        vk1_fkd->addData(akp_file.read_dept(index), vk);
+        if ( (VK1_pos >= 0) && (VK1_pos <  VAK_8_NUM_POINTS) )
+        {
+            int t;
+            t = VK1_pos * time_line1->get_time_step() + time_line1->get_time_zero();
+            on_showVK1time(t);
+            on_showVK1ampl(vk[VK1_pos]);
+        }
 
         akp_file.read_ch2(index, vk);
         on_showNewData (akp_file.read_ch2_vk_number(index), vk);
 //        vk2_fkd->addData(akp_file.read_dept(index), vk);
+        if ( (VK2_pos >= 0) && (VK2_pos <  VAK_8_NUM_POINTS) )
+        {
+            int t;
+            t = VK2_pos * time_line2->get_time_step() + time_line2->get_time_zero();
+            on_showVK2time(t);
+            on_showVK2ampl(vk[VK2_pos]);
+        }
 
     //    akp_file.read_izl_ampl                               (const int index);
     //    akp_file.read_tool_type                              (const int index);
@@ -1031,6 +1088,38 @@ void MainWindow::on_showCRC (const bool crc)
         label_CRC_check->setText(QString::fromUtf8("CRC: ОШИБКА!!!"));
 }
 //-------------------------------------------------------------------
+void MainWindow::on_showVK1time (const int time)
+{
+    label_VK1time->setText( QString::fromUtf8("T1: %1мкс").arg(time) );
+}
+//-------------------------------------------------------------------
+void MainWindow::on_showVK1ampl (const int ampl)
+{
+    label_VK1ampl->setText( QString::fromUtf8("A1: %1").arg(ampl) );
+}
+//-------------------------------------------------------------------
+void MainWindow::on_showVK2time (const int time)
+{
+    label_VK2time->setText( QString::fromUtf8("T2: %1мкс").arg(time) );
+}
+//-------------------------------------------------------------------
+void MainWindow::on_showVK2ampl (const int ampl)
+{
+    label_VK2ampl->setText( QString::fromUtf8("A2: %1").arg(ampl) );
+}
+//-------------------------------------------------------------------
+void MainWindow::on_changeVK1pos (const QPointF pos)
+{
+    VK1_pos = pos.x() / time_line1->get_x_scale();
+    on_show();
+}
+//-------------------------------------------------------------------
+void MainWindow::on_changeVK2pos (const QPointF pos)
+{
+    VK2_pos = pos.x() / time_line2->get_x_scale();
+    on_show();
+}
+//-------------------------------------------------------------------
 //void MainWindow::on_showCRC2 (const bool crc)
 //{
 //    QColor  color = get_color_on_CRC(crc);
@@ -1131,7 +1220,12 @@ void MainWindow::load_settings(void)
     startDepth      = Depth;
     lastDepth       = Depth;
     DepthStep       = app_settings->value(QString::fromUtf8("/DepthStep"),     10                           ).toInt();
+#ifdef Q_OS_WIN
     FolderName      = app_settings->value(QString::fromUtf8("/FolderName"),    QString::fromUtf8("D:\\Скважины")     ).toString();
+#endif
+#ifdef Q_OS_LINUX
+    FolderName      = app_settings->value(QString::fromUtf8("/FolderName"),    QString::fromUtf8("~/Скважины")     ).toString();
+#endif
     FileName        = QString::fromUtf8("%1/%2a.4sd").arg(FolderName).arg(WellNo);
 
     QColor color = QColor(Qt::red);
@@ -1166,6 +1260,9 @@ void MainWindow::load_settings(void)
     fkd_level       = app_settings->value(QString::fromUtf8("/FkdLevel"),      0                           ).toInt();
 
     app_settings->endGroup();
+
+    VK1_pos = VAK_8_NUM_POINTS;
+    VK2_pos = VAK_8_NUM_POINTS;
 }
 //-----------------------------------------------------------------------------
 void MainWindow::save_settings(void)

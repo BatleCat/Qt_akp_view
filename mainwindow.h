@@ -10,6 +10,7 @@
 #include <QTimer>
 #include <QTimerEvent>
 #include <QGraphicsScene>
+#include <QGraphicsSceneMouseEvent>
 #include <QGraphicsView>
 #include <QGraphicsItem>
 #include <QLabel>
@@ -36,6 +37,30 @@ namespace Ui {
 class MainWindow;
 }
 //-------------------------------------------------------------------
+class CustomScene : public QGraphicsScene
+{
+    Q_OBJECT
+public:
+    explicit CustomScene(QObject *parent = 0) :
+        QGraphicsScene()
+    {
+        Q_UNUSED(parent);
+    }
+    ~CustomScene(){}
+
+signals:
+    // Сигнал для передачи координат положения курсора мыши
+    void signalTargetCoordinate(QPointF point);
+
+public slots:
+
+private:
+    // Функция, в которой производится отслеживание положения мыши
+    void mousePressEvent(QGraphicsSceneMouseEvent *event){
+        emit signalTargetCoordinate(event->scenePos());
+    }
+};
+//-----------------------------------------------------------------------------
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
@@ -74,13 +99,15 @@ private:
     QThread*            file_thread;
     int                 index;
     //-------------------------------------------------------------------
-    QGraphicsScene*     scene_vk1;
+//    QGraphicsScene*     scene_vk1;
+    CustomScene*        scene_vk1;
     QGraphicsView*      view_vk1;
     Qt_VK*              vk1;
     Qt_biGREED*         vk1_greed;
     Qt_TIME_LINE*       time_line1;
     //-------------------------------------------------------------------
-    QGraphicsScene*     scene_vk2;
+//    QGraphicsScene*     scene_vk2;
+    CustomScene*        scene_vk2;
     QGraphicsView*      view_vk2;
     Qt_VK*              vk2;
     Qt_biGREED*         vk2_greed;
@@ -120,6 +147,12 @@ private:
 
     QLabel*             label_ML;
 
+    QLabel*             label_VK1time;
+    QLabel*             label_VK1ampl;
+
+    QLabel*             label_VK2time;
+    QLabel*             label_VK2ampl;
+
     QString OperatorName;
     QString WellNo;
     QString FildName;
@@ -150,6 +183,9 @@ private:
 
     qint32  blk_count;
     qint32  bad_blk;
+
+    int     VK1_pos;
+    int     VK2_pos;
 
     QColor  get_color_on_CRC(const bool crc);
     void    load_settings(void);
@@ -198,6 +234,13 @@ private slots:
 //    void on_showCRC7 (const bool crc);
 //    void on_showCRC8 (const bool crc);
 
+    void on_showVK1time (const int time);
+    void on_showVK1ampl (const int ampl);
+    void on_showVK2time (const int time);
+    void on_showVK2ampl (const int ampl);
+
+    void on_changeVK1pos (const QPointF pos);
+    void on_changeVK2pos (const QPointF pos);
 };
 //-------------------------------------------------------------------
 #endif // MAINWINDOW_H

@@ -13,8 +13,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 set(QMAKE_CXXFLAGS ${QMAKE_CXXFLAGS} -Ofast -march=x86-64 -std=c++11 -minline-all-stringops -mmmx -msse -msse2 -msse3 -mssse3 -msse4.1 -msse4.2)
 
-configure_file(app_config.h.in "${qt_akp_reg_SOURCE_DIR}/app_config.h")
-configure_file(resources.rc.in "${qt_akp_reg_SOURCE_DIR}/resources.rc")
+configure_file(app_config.h.in "${qt_akp_view_SOURCE_DIR}/app_config.h")
+configure_file(resources.rc.in "${qt_akp_view_SOURCE_DIR}/resources.rc")
 
 # QtCreator supports the following variables for Android, which are identical to qmake Android variables.
 # Check http://doc.qt.io/qt-5/deployment-android.html for more information.
@@ -147,6 +147,6 @@ add_custom_command(TARGET qt_akp_view POST_BUILD
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Gui>     $<TARGET_FILE_DIR:qt_akp_view>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Core>    $<TARGET_FILE_DIR:qt_akp_view>
         COMMAND ${CMAKE_COMMAND} -E copy_if_different $<TARGET_FILE:Qt${QT_VERSION_MAJOR}::Network> $<TARGET_FILE_DIR:qt_akp_view>
-        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/0_a.gis    		    $<TARGET_FILE_DIR:qt_akp_view>
+#        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}/0_a.gis    		    $<TARGET_FILE_DIR:qt_akp_view>
 #        COMMAND ${CMAKE_COMMAND} -E copy_if_different ${CMAKE_SOURCE_DIR}images/TNG.ico             $<TARGET_FILE_DIR:qt_akp_view>
         )
