@@ -3,3 +3,4 @@ build/*
 CMakeLists.txt.user
 app_config.h
 resources.rc
+*.gis
