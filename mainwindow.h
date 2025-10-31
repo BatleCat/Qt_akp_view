@@ -41,10 +41,17 @@ class CustomScene : public QGraphicsScene
 {
     Q_OBJECT
 public:
-    explicit CustomScene(QObject *parent = 0) :
-        QGraphicsScene()
+    explicit CustomScene(QObject *parent = nullptr) : QGraphicsScene(parent)
     {
-        Q_UNUSED(parent);
+
+    }
+    explicit CustomScene(const QRectF &sceneRect, QObject *parent = nullptr) : QGraphicsScene(sceneRect, parent)
+    {
+
+    }
+    explicit CustomScene(qreal x, qreal y, qreal width, qreal height, QObject *parent = nullptr) : QGraphicsScene(x, y, width, height, parent)
+    {
+
     }
     ~CustomScene(){}
 
@@ -99,14 +106,14 @@ private:
     QThread*            file_thread;
     int                 index;
     //-------------------------------------------------------------------
-//    QGraphicsScene*     scene_vk1;
+    // QGraphicsScene*     scene_vk1;
     CustomScene*        scene_vk1;
     QGraphicsView*      view_vk1;
     Qt_VK*              vk1;
     Qt_biGREED*         vk1_greed;
     Qt_TIME_LINE*       time_line1;
     //-------------------------------------------------------------------
-//    QGraphicsScene*     scene_vk2;
+    // QGraphicsScene*     scene_vk2;
     CustomScene*        scene_vk2;
     QGraphicsView*      view_vk2;
     Qt_VK*              vk2;

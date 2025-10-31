@@ -44,7 +44,7 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::MainWindow),
-    app_settings(new QSettings("TNG-Group", "qt_akp_view")),
+    app_settings(new QSettings("TNG-Group", "qt_akp_reg")),
 //    check_state(parent),
     akp_file(parent)
 {
@@ -62,7 +62,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(file_thread, &QThread::finished,          file_thread,   &QThread::deleteLater    );
     //-------------------------------------------------------------------------
     ui->setupUi(this);
-    setWindowIcon(QIcon(":/images/TNG.ico"));
+    // setWindowIcon(QIcon(":/icons/images/TNG.ico"));
 
     ui->pushButton_Up->setDisabled(true);
     ui->pushButton_Down->setDisabled(true);
@@ -183,7 +183,7 @@ MainWindow::MainWindow(QWidget *parent) :
     label_ML->setMinimumSize(ML_Size);
 //    label_ML->setFrameStyle(QFrame::Box);
     QColor color(Qt::red);
-    color = palette().background().color();
+    color = palette().window().color();
     label_ML->setStyleSheet(QString::fromUtf8("background-color: rgb(%1, %2, %3);").arg(color.red()).arg(color.green()).arg(color.blue()));
     statusBar()->addPermanentWidget(label_ML);
     //-------------------------------------------------------------------------
@@ -253,16 +253,24 @@ MainWindow::MainWindow(QWidget *parent) :
     QRectF rectf;
     rectf.setRect(0.0, 0.0, 100.0, 100.0);
 
-//    scene_vk1 = new QGraphicsScene(rectf);
-    scene_vk1 = new CustomScene;
-    scene_vk1->setSceneRect(rectf);
+    // scene_vk1 = new QGraphicsScene(rectf);
+    scene_vk1 = new CustomScene(rectf);
 
     view_vk1 = new QGraphicsView(scene_vk1);
     view_vk1->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     view_vk1->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view_vk1->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view_vk1->scale(1.0, 1.0);
 
-    rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 380);
+    // rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 380);
+    if (FKDstep > 0)
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, ui->widget_VK1->height() );
+    }
+    else
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS, ui->widget_VK1->height() );
+    }
 
     vk1 = new Qt_VK(rect, scene_vk1);
     vk1->setColorLine(VKColor);
@@ -295,8 +303,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, &MainWindow::changeFKDstep,   time_line1, &Qt_TIME_LINE::on_changeTimeScale );
 
-    view_vk1->setMouseTracking(true);
-    connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
+    // view_vk1->setMouseTracking(true);
+    // connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
 
     ui->horizontalLayout_VK1->addWidget(view_vk1);
     //-------------------------------------------------------------------------
@@ -309,7 +317,15 @@ MainWindow::MainWindow(QWidget *parent) :
     view_vk1_fkd->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view_vk1_fkd->scale(1.0, 1.0);
 
-    rect.setRect(0, 0, VAK_8_NUM_POINTS, 200);
+//    rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 200);
+    if (FKDstep > 0)
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, ui->widget_VK1_FKD->height() );
+    }
+    else
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS, ui->widget_VK1_FKD->height() );
+    }
     vk1_fkd = new CVAK32_FKD(rect, scene_vk1_fkd);
     vk1_fkd->setColorBack(FonColor);
     vk1_fkd->setColorGreed(GreedColor);
@@ -336,16 +352,24 @@ MainWindow::MainWindow(QWidget *parent) :
 //    QRectF rectf;
     rectf.setRect(0.0, 0.0, 100.0, 100.0);
 
-//    scene_vk2 = new QGraphicsScene(rectf);
-    scene_vk2 = new CustomScene;
-    scene_vk2->setSceneRect(rectf);
+    // scene_vk2 = new QGraphicsScene(rectf);
+    scene_vk2 = new CustomScene(rectf);
 
     view_vk2 = new QGraphicsView(scene_vk2);
     view_vk2->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     view_vk2->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view_vk2->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
+    view_vk2->scale(1.0, 1.0);
 
-    rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 380);
+    // rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 380);
+    if (FKDstep > 0)
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, ui->widget_VK2->height() );
+    }
+    else
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS, ui->widget_VK2->height() );
+    }
 
     vk2 = new Qt_VK(rect, scene_vk2);
     vk2->setColorLine(VKColor);
@@ -378,8 +402,8 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(this, &MainWindow::changeFKDstep,   time_line2, &Qt_TIME_LINE::on_changeTimeScale );
 
-    view_vk2->setMouseTracking(true);
-    connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
+    // view_vk2->setMouseTracking(true);
+    // connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
 
     ui->horizontalLayout_VK2->addWidget(view_vk2);
     //-------------------------------------------------------------------------
@@ -392,7 +416,15 @@ MainWindow::MainWindow(QWidget *parent) :
     view_vk2_fkd->setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     view_vk2_fkd->scale(1.0, 1.0);
 
-    rect.setRect(0, 0, VAK_8_NUM_POINTS, 200);
+    // rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, 200);
+    if (FKDstep > 0)
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS * FKDstep, ui->widget_VK2_FKD->height() );
+    }
+    else
+    {
+        rect.setRect(0, 0, VAK_8_NUM_POINTS, ui->widget_VK2_FKD->height() );
+    }
     vk2_fkd = new CVAK32_FKD(rect, scene_vk2_fkd);
     vk2_fkd->setColorBack(FonColor);
     vk2_fkd->setColorGreed(GreedColor);
@@ -413,6 +445,7 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(this,           &MainWindow::changeFKDstep,     vk2_fkd,         &CVAK32_FKD::on_changeTimeScale    );
     connect(this,           &MainWindow::changeFKDlevel,    vk2_fkd,         &CVAK32_FKD::on_changeLevel        );
     connect(vk2_fkd,        SIGNAL( update() ),             scene_vk2_fkd,   SLOT( update() )                   );
+    // connect(vk2_fkd,        &CVAK32_FKD::update,            scene_vk2_fkd,   &QGraphicsScene::update            );
 
     //-------------------------------------------------------------------------
     rectf.setRect(0.0, 0.0, 80.0, 150.0);
@@ -474,7 +507,7 @@ MainWindow::MainWindow(QWidget *parent) :
 MainWindow::~MainWindow()
 {
     //-------------------------------------------------------------------------
-    save_settings();
+    // save_settings();
     //-------------------------------------------------------------------------
     delete mlCol;
     delete view_ml_col;
@@ -516,12 +549,14 @@ void MainWindow::on_pushButtonFileOpen(void)
 {
     akp_file.clear();
 
-    FileName = QFileDialog::getOpenFileName(this, QString::fromUtf8("Открыть файл АКП"), "d:/", QString::fromUtf8("Файлы АКП (*.gis)"));
+    FileName = QFileDialog::getOpenFileName(this, QString::fromUtf8("Открыть файл АКП"), FileName, QString::fromUtf8("Файлы АКП (*.gis)"));
     if (!FileName.isEmpty())
     {
         akp_file.load(FileName);
         index = 0;
     }
+
+    // qDebug() << QString::fromUtf8("Файл %1 считан в память").arg(FileName);
 
     vk2_fkd->clearData();
     vk1_fkd->clearData();
@@ -529,13 +564,21 @@ void MainWindow::on_pushButtonFileOpen(void)
 
     TVAK8_WAVE vk;
     int i;
-    for(i = 0; i < akp_file.count(); i++)
+    // for(i = 0; i < akp_file.count(); i++)
+    for(i = 2; i < akp_file.count(); i++)
     {
+        // qDebug() << QString::fromUtf8("Читаю кадр %1").arg(i);
         akp_file.read_ch1(i, vk);
+        // qDebug() << QString::fromUtf8("Читаю ВК1");
         vk1_fkd->addData(akp_file.read_dept(i), vk);
+        // qDebug() << QString::fromUtf8("Получены данные ФКД1");
         akp_file.read_ch2(i, vk);
+        // qDebug() << QString::fromUtf8("Читаю ВК2");
         vk2_fkd->addData(akp_file.read_dept(i), vk);
+        // qDebug() << QString::fromUtf8("Получены данные ФКД2");
     }
+
+    // qDebug() << QString::fromUtf8("Получены данные ФКД1 и ФКД2");
 
     ui->pushButton_Down->setDisabled(false);
     ui->pushButton_Up->setDisabled(false);
@@ -548,10 +591,16 @@ void MainWindow::on_pushButtonFileOpen(void)
     blk_count = 0;
     bad_blk   = 0;
 
-    ui->verticalScrollBar->setMaximum(0);
+    ui->verticalScrollBar->setMinimum(0);
     ui->verticalScrollBar->setMaximum(akp_file.count() - 1);
 
     on_pushButtonDown();
+
+    view_vk1->setMouseTracking(true);
+    connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
+
+    view_vk2->setMouseTracking(true);
+    connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
 }
 //-------------------------------------------------------------------
 void MainWindow::on_cmdIncAmpl(void)
@@ -832,7 +881,7 @@ void MainWindow::on_showBadPocketCount(const int count)
 //-------------------------------------------------------------------
 void MainWindow::on_showDept(const qint32 dept)
 {
-    QColor color = palette().background().color();
+    QColor color = palette().window().color();//.background().color();
 
     statusBar()->setStyleSheet(QString::fromUtf8("background-color: rgb(%1, %2, %3);").arg(color.red()).arg(color.green()).arg(color.blue()));
 
@@ -856,7 +905,7 @@ void MainWindow::on_showML(const bool ml)
         color = MMColor;
         mlCol->setML(Depth);    //==========>>??????
     }
-    else    color = palette().background().color();
+    else    color = palette().window().color();
 
     label_ML->setStyleSheet(QString::fromUtf8("background-color: rgb(%1, %2, %3);").arg(color.red()).arg(color.green()).arg(color.blue()));
 }
@@ -1220,18 +1269,19 @@ void MainWindow::load_settings(void)
     startDepth      = Depth;
     lastDepth       = Depth;
     DepthStep       = app_settings->value(QString::fromUtf8("/DepthStep"),     10                           ).toInt();
-#ifdef Q_OS_WIN
+
+#if defined(Q_OS_LINUX)
+    FolderName      = QDir::toNativeSeparators(app_settings->value(QString::fromUtf8("/FolderName"),    QString::fromUtf8("~/Скважины")     ).toString());
+#elif defined(Q_OS_WIN)
     FolderName      = app_settings->value(QString::fromUtf8("/FolderName"),    QString::fromUtf8("D:\\Скважины")     ).toString();
 #endif
-#ifdef Q_OS_LINUX
-    FolderName      = app_settings->value(QString::fromUtf8("/FolderName"),    QString::fromUtf8("~/Скважины")     ).toString();
-#endif
+
     FileName        = QString::fromUtf8("%1/%2a.4sd").arg(FolderName).arg(WellNo);
 
     QColor color = QColor(Qt::red);
     MMColor.setRgba(  app_settings->value(QString::fromUtf8("/MMColor"),       color.rgba()                ).toInt());
 
-    color = palette().background().color();
+    color = palette().window().color();
     FonColor.setRgba( app_settings->value(QString::fromUtf8("/FonColor"),      color.rgba()                ).toInt());
 
     color = QColor(Qt::green);
@@ -1267,6 +1317,39 @@ void MainWindow::load_settings(void)
 //-----------------------------------------------------------------------------
 void MainWindow::save_settings(void)
 {
+    app_settings->beginGroup(QString::fromUtf8("/Settings"));
+
+    app_settings->setValue(QString::fromUtf8("/OperatorName"), OperatorName         );
+    app_settings->setValue(QString::fromUtf8("/WellNo"),       WellNo               );
+    app_settings->setValue(QString::fromUtf8("/FildName"),     FildName             );
+
+    app_settings->setValue(QString::fromUtf8("/Depth"),        Depth                );
+    app_settings->setValue(QString::fromUtf8("/DepthStep"),    DepthStep            );
+
+    app_settings->setValue(QString::fromUtf8("/FolderName"),   FolderName           );
+
+    app_settings->setValue(QString::fromUtf8("/MMColor"),      MMColor.rgba()       );
+    app_settings->setValue(QString::fromUtf8("/FonColor"),     FonColor.rgba()      );
+    app_settings->setValue(QString::fromUtf8("/GreedColor"),   GreedColor.rgba()    );
+    app_settings->setValue(QString::fromUtf8("/TextColor"),    TextColor.rgba()     );
+    app_settings->setValue(QString::fromUtf8("/LevelColor"),   LevelColor.rgba()    );
+    app_settings->setValue(QString::fromUtf8("/FKDColor"),     FKDColor.rgba()      );
+
+    app_settings->setValue(QString::fromUtf8("/FKDstep"),      FKDstep              );
+
+    app_settings->setValue(QString::fromUtf8("/VKColor"),      VKColor.rgba()       );
+
+    app_settings->setValue(QString::fromUtf8("/VKlineSize"),   VKlineSize           );
+    app_settings->setValue(QString::fromUtf8("/DepthScale"),   DepthScale           );
+    app_settings->setValue(QString::fromUtf8("/dpsX"),         dpsX                 );
+    app_settings->setValue(QString::fromUtf8("/dpsY"),         dpsY                 );
+
+    app_settings->setValue(QString::fromUtf8("/MaxAmpl"),      max_ampl             );
+    app_settings->setValue(QString::fromUtf8("/FkdLevel"),     fkd_level            );
+
+    app_settings->endGroup();
+
+    app_settings->sync();
 /*
     app_settings->beginGroup(QString::fromUtf8("/Settings"));
 
@@ -1318,6 +1401,8 @@ void MainWindow::save_settings(void)
 
 
     app_settings->endGroup();
+
+    app_settings->sync();
 */
 }
 //-----------------------------------------------------------------------------
