@@ -61,14 +61,14 @@ void qt_akp_file_read::load_head(const QString &file_name)
     if (str != QString::fromUtf8("~head")) throw AKP_FILE_unknow_file;
 
     str = head.readLine();
-    QStringList list = str.split(" ", Qt::SkipEmptyParts);
+    QStringList list = str.split(" ", QString::SkipEmptyParts);
     if (list.at(0) != QString::fromUtf8("Формат")) throw AKP_FILE_unknow_file;
     if (list.at(1) != QString::fromUtf8("GIS")   ) throw AKP_FILE_unknow_file;
     File_Type = list.at(1);
     list.clear();
 
     str = head.readLine();
-    list = str.split(" ", Qt::SkipEmptyParts);
+    list = str.split(" ", QString::SkipEmptyParts);
     if (list.at(0) != QString::fromUtf8("Версия")) throw AKP_FILE_unknow_file;
     if (list.at(1) != QString::fromUtf8("1.0")   ) throw AKP_FILE_unknow_file;
     else Ver = "1.0";
@@ -112,7 +112,7 @@ void qt_akp_file_read::load_well_sec(QTextStream &head)
         str = head.readLine();
         if (str.isEmpty()) throw AKP_FILE_error;      // Error
 
-        QStringList list = str.split(" ", Qt::SkipEmptyParts);
+        QStringList list = str.split(" ", QString::SkipEmptyParts);
 
         if (list.count() > 1)
         {
@@ -198,7 +198,7 @@ void qt_akp_file_read::load_tool_sec(QTextStream &head)
         if (str.isEmpty()) throw AKP_FILE_error;
 
 //        QStringList list = str.split(QRegExp("\\s+"), QString::SkipEmptyParts);
-        QStringList list = str.split(" ", Qt::SkipEmptyParts);
+        QStringList list = str.split(" ", QString::SkipEmptyParts);
 
         if (list.count() > 1)
         {
@@ -235,7 +235,7 @@ void qt_akp_file_read::load_tool_sec(QTextStream &head)
                     str = head.readLine();
                     if (str.at(0) == '~') break;
 
-                    QStringList list1 = str.split(" ", Qt::SkipEmptyParts);
+                    QStringList list1 = str.split(" ", QString::SkipEmptyParts);
 
                     if (list1.at(0) == QString::fromUtf8("И1")) Shift_Point_IZL = list1.at(1).toInt();
                     if (list1.at(0) == QString::fromUtf8("П1")) Shift_Point_VK1 = list1.at(1).toInt();
