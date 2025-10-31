@@ -547,60 +547,99 @@ MainWindow::~MainWindow()
 //-------------------------------------------------------------------
 void MainWindow::on_pushButtonFileOpen(void)
 {
-    akp_file.clear();
-
-    FileName = QFileDialog::getOpenFileName(this, QString::fromUtf8("Открыть файл АКП"), FileName, QString::fromUtf8("Файлы АКП (*.gis)"));
-    if (!FileName.isEmpty())
+    try
     {
-        akp_file.load(FileName);
-        index = 0;
+        akp_file.clear();
+
+        FileName = QFileDialog::getOpenFileName(this, QString::fromUtf8("Открыть файл АКП"), FileName, QString::fromUtf8("Файлы АКП (*.gis)"));
+        if (!FileName.isEmpty())
+        {
+            akp_file.load(FileName);
+            index = 0;
+        }
+
+        // qDebug() << QString::fromUtf8("Файл %1 считан в память").arg(FileName);
+
+        vk2_fkd->clearData();
+        vk1_fkd->clearData();
+        mlCol->delPoints();
+
+        TVAK8_WAVE vk;
+        int i;
+        for(i = 0; i < akp_file.count(); i++)
+    //    for(i = 2; i < akp_file.count(); i++)
+        {
+            // qDebug() << QString::fromUtf8("Читаю кадр %1").arg(i);
+            akp_file.read_ch1(i, vk);
+            // qDebug() << QString::fromUtf8("Читаю ВК1");
+            vk1_fkd->addData(akp_file.read_dept(i), vk);
+            // qDebug() << QString::fromUtf8("Получены данные ФКД1");
+            akp_file.read_ch2(i, vk);
+            // qDebug() << QString::fromUtf8("Читаю ВК2");
+            vk2_fkd->addData(akp_file.read_dept(i), vk);
+            // qDebug() << QString::fromUtf8("Получены данные ФКД2");
+        }
+
+        // qDebug() << QString::fromUtf8("Получены данные ФКД1 и ФКД2");
+
+        ui->pushButton_Down->setDisabled(false);
+        ui->pushButton_Up->setDisabled(false);
+
+    //    Depth = akp_file.read_dept(0);
+    //    startDepth = akp_file.start_dept().toInt();
+        startDepth = akp_file.read_dept(0);
+    //    lastDepth = Depth;
+
+        blk_count = 0;
+        bad_blk   = 0;
+
+        ui->verticalScrollBar->setMinimum(0);
+        ui->verticalScrollBar->setMaximum(akp_file.count() - 1);
+
+        on_pushButtonDown();
+
+        view_vk1->setMouseTracking(true);
+        connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
+
+        view_vk2->setMouseTracking(true);
+        connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
     }
-
-    // qDebug() << QString::fromUtf8("Файл %1 считан в память").arg(FileName);
-
-    vk2_fkd->clearData();
-    vk1_fkd->clearData();
-    mlCol->delPoints();
-
-    TVAK8_WAVE vk;
-    int i;
-    // for(i = 0; i < akp_file.count(); i++)
-    for(i = 2; i < akp_file.count(); i++)
+    catch (const TAKP_FILE_ERROR& err)
     {
-        // qDebug() << QString::fromUtf8("Читаю кадр %1").arg(i);
-        akp_file.read_ch1(i, vk);
-        // qDebug() << QString::fromUtf8("Читаю ВК1");
-        vk1_fkd->addData(akp_file.read_dept(i), vk);
-        // qDebug() << QString::fromUtf8("Получены данные ФКД1");
-        akp_file.read_ch2(i, vk);
-        // qDebug() << QString::fromUtf8("Читаю ВК2");
-        vk2_fkd->addData(akp_file.read_dept(i), vk);
-        // qDebug() << QString::fromUtf8("Получены данные ФКД2");
+        switch (err)
+        {
+            case TAKP_FILE_ERROR::AKP_FILE_success:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_success");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_error:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_error");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_unknow_file:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_unknow_file");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_CRC_error:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_CRC_error");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_index_out_of_band:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_index_out_of_band");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_bad_pointer:
+            {
+                qDebug() << QString::fromUtf8("AKP_FILE_bad_pointer");
+                break;
+            }
+        }
     }
-
-    // qDebug() << QString::fromUtf8("Получены данные ФКД1 и ФКД2");
-
-    ui->pushButton_Down->setDisabled(false);
-    ui->pushButton_Up->setDisabled(false);
-
-//    Depth = akp_file.read_dept(0);
-//    startDepth = akp_file.start_dept().toInt();
-    startDepth = akp_file.read_dept(0);
-//    lastDepth = Depth;
-
-    blk_count = 0;
-    bad_blk   = 0;
-
-    ui->verticalScrollBar->setMinimum(0);
-    ui->verticalScrollBar->setMaximum(akp_file.count() - 1);
-
-    on_pushButtonDown();
-
-    view_vk1->setMouseTracking(true);
-    connect (scene_vk1, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK1pos);
-
-    view_vk2->setMouseTracking(true);
-    connect (scene_vk2, &CustomScene::signalTargetCoordinate, this, &MainWindow::on_changeVK2pos);
 }
 //-------------------------------------------------------------------
 void MainWindow::on_cmdIncAmpl(void)
