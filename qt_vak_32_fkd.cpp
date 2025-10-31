@@ -123,8 +123,11 @@ void CVAK32_FKD::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
                 x2 = x1 + x_scale;
                 if(pvk_point->vk_data[k] > level)
                 {
-                    r.setCoords(x1, y1, x2, y2);
-                    painter->fillRect(r, brush_line);
+                    if ((x1 >= 0) && (y1 >= 0) && (x2 >= 0) && (y2 >= 0))
+                    {
+                        r.setCoords(x1, y1, x2, y2);
+                        painter->fillRect(r, brush_line);
+                    }
                 }
                 x1 = x2;
                 if (x1 > Width) break;

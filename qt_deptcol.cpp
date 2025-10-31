@@ -94,7 +94,8 @@ void Qt_DEPTCOL::paint(QPainter *painter, const QStyleOptionGraphicsItem *option
         painter->setFont(font);
         r.setTop(y);
         r.setHeight(1.5 * fm.height());
-        r.setWidth(1.5 *  fm.width(qsDep));
+        // r.setWidth(1.5 *  fm.width(qsDep));
+        r.setWidth(1.5 *  fm.horizontalAdvance(qsDep));
 
         x = (Width - r.width()) / 2;
         r.setLeft(x);
