@@ -395,11 +395,19 @@ void akp_check_state::calc_time_meserment(void)
     quint32 freq;
     quint32 time;
 
+    time = 0;
+
     old_time_meserment = time_meserment;
 
     delta = (time_start_meserment - time_stop_meserment);
-    freq = timer_clk / delta;
-    time = (quint32)1000000  / freq;
+    if (delta > 0)
+    {
+        freq = timer_clk / delta;
+        if (freq > 0)
+        {
+            time = (quint32)1000000  / freq;
+        }
+    }
     time_meserment = time - 2;
 }
 //-----------------------------------------------------------------------------
