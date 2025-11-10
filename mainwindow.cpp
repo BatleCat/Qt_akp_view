@@ -558,7 +558,7 @@ void MainWindow::on_pushButtonFileOpen(void)
             index = 0;
         }
 
-        // qDebug() << QString::fromUtf8("Файл %1 считан в память").arg(FileName);
+//         qDebug() << QString::fromUtf8("Файл %1 считан в память").arg(FileName);
 
         vk2_fkd->clearData();
         vk1_fkd->clearData();
@@ -569,18 +569,18 @@ void MainWindow::on_pushButtonFileOpen(void)
         for(i = 0; i < akp_file.count(); i++)
     //    for(i = 2; i < akp_file.count(); i++)
         {
-            // qDebug() << QString::fromUtf8("Читаю кадр %1").arg(i);
+//             qDebug() << QString::fromUtf8("Читаю кадр %1").arg(i);
             akp_file.read_ch1(i, vk);
-            // qDebug() << QString::fromUtf8("Читаю ВК1");
+//             qDebug() << QString::fromUtf8("Читаю ВК1");
             vk1_fkd->addData(akp_file.read_dept(i), vk);
-            // qDebug() << QString::fromUtf8("Получены данные ФКД1");
+//             qDebug() << QString::fromUtf8("Получены данные ФКД1");
             akp_file.read_ch2(i, vk);
-            // qDebug() << QString::fromUtf8("Читаю ВК2");
+//             qDebug() << QString::fromUtf8("Читаю ВК2");
             vk2_fkd->addData(akp_file.read_dept(i), vk);
-            // qDebug() << QString::fromUtf8("Получены данные ФКД2");
+//             qDebug() << QString::fromUtf8("Получены данные ФКД2");
         }
 
-        // qDebug() << QString::fromUtf8("Получены данные ФКД1 и ФКД2");
+//         qDebug() << QString::fromUtf8("Получены данные ФКД1 и ФКД2");
 
         ui->pushButton_Down->setDisabled(false);
         ui->pushButton_Up->setDisabled(false);
@@ -635,10 +635,18 @@ void MainWindow::on_pushButtonFileOpen(void)
             }
             case TAKP_FILE_ERROR::AKP_FILE_bad_pointer:
             {
-                qDebug() << QString::fromUtf8("AKP_FILE_bad_pointer");
+                qDebug() << QString::fromUtf8("on_pushButtonFileOpen: ") << QString::fromUtf8("AKP_FILE_bad_pointer");
                 break;
             }
+            default:
+            {
+                qDebug() << QString::fromUtf8("on_pushButtonFileOpen: ") << QString::fromUtf8("Default");
+            }
         }
+    }
+    catch(...)
+    {
+        qDebug() << QString::fromUtf8("on_pushButtonFileOpen: ") << QString::fromUtf8("Unknown error");
     }
 }
 //-------------------------------------------------------------------
@@ -844,19 +852,19 @@ void MainWindow::on_pushButtonUp(void)
 //-------------------------------------------------------------------
 void MainWindow::on_show(void)
 {
-    TVAK8_WAVE vk;
+    try
+    {
+        TVAK8_WAVE vk;
 
-    index = ui->verticalScrollBar->maximum() - ui->verticalScrollBar->value();
+        index = ui->verticalScrollBar->maximum() - ui->verticalScrollBar->value();
 
-    on_showPocketCount(blk_count);
-    on_showBadPocketCount(bad_blk);
+        on_showPocketCount(blk_count);
+        on_showBadPocketCount(bad_blk);
 
-    //    void on_showDept    (const qint32 dept);
         on_showML(akp_file.read_ml(index));
 
         akp_file.read_ch1(index, vk);
         on_showNewData (akp_file.read_ch1_vk_number(index), vk);
-//        vk1_fkd->addData(akp_file.read_dept(index), vk);
         if ( (VK1_pos >= 0) && (VK1_pos <  VAK_8_NUM_POINTS) )
         {
             int t;
@@ -867,7 +875,6 @@ void MainWindow::on_show(void)
 
         akp_file.read_ch2(index, vk);
         on_showNewData (akp_file.read_ch2_vk_number(index), vk);
-//        vk2_fkd->addData(akp_file.read_dept(index), vk);
         if ( (VK2_pos >= 0) && (VK2_pos <  VAK_8_NUM_POINTS) )
         {
             int t;
@@ -875,9 +882,6 @@ void MainWindow::on_show(void)
             on_showVK2time(t);
             on_showVK2ampl(vk[VK2_pos]);
         }
-
-    //    akp_file.read_izl_ampl                               (const int index);
-    //    akp_file.read_tool_type                              (const int index);
 
         on_showIZLtype (akp_file.is_frame_CRC_OK_for_izl_type(index), akp_file.read_izl_type(index));
         on_showIZLfreq (akp_file.is_frame_CRC_OK_for_izl_freq(index), akp_file.read_izl_freq(index));
@@ -893,19 +897,54 @@ void MainWindow::on_show(void)
 
         on_showTimeMeserment(akp_file.is_frame_CRC_OK_for_time_meserment(index), akp_file.read_time_meserment(index));
 
-    //    akp_file.is_frame_CRC_OK_for_tool_type(index);
-
         on_showCRC (akp_file.is_frame_CRC_OK(index));
-//        on_showCRC (akp_file.is_frame_CRC_OK_for_ch2_frame_label(index));
-//        on_showCRC2 (akp_file.is_frame_CRC_OK_for_mode_number(index));
-//        on_showCRC3 (akp_file.is_frame_CRC_OK_for_mode_count(index));
-    //    on_showCRC4 (const bool crc);
-    //    on_showCRC5 (const bool crc);
-//        on_showCRC6 (akp_file.is_frame_CRC_OK_for_vk_calibration_amplitude(index));
-//        on_showCRC7 (akp_file.is_frame_CRC_OK_for_timer_clk(index));
-//        on_showCRC8 (akp_file.is_frame_CRC_OK_for_time_stop_meserment(index));
 
         emit cmdSetDepth(akp_file.read_dept(index));
+    }
+    catch (const TAKP_FILE_ERROR& err)
+    {
+        switch (err)
+        {
+            case TAKP_FILE_ERROR::AKP_FILE_success:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_success");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_error:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_error");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_unknow_file:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_unknow_file");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_CRC_error:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_CRC_error");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_index_out_of_band:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_index_out_of_band");
+                break;
+            }
+            case TAKP_FILE_ERROR::AKP_FILE_bad_pointer:
+            {
+                qDebug() << QString::fromUtf8("on_show: AKP_FILE_bad_pointer");
+                break;
+            }
+            default:
+            {
+                qDebug() << QString::fromUtf8("on_show: default");
+            }
+        }
+    }
+    catch(...)
+    {
+        qDebug() << QString::fromUtf8("on_show: Unknown error");
+    }
 }
     //-------------------------------------------------------------------
 void MainWindow::on_showPocketCount(const int count)
